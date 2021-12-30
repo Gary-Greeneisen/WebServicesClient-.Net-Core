@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebServicesClient_.Net_Core
+namespace WebServicesClient_.Net_Core.NUnit_Tests
 {
     class WebServiceUnitTestTemplate
     {

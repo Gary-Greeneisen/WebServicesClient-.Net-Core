@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,54 +8,53 @@ using System.Net.Http.Headers;
 using WebServicesClient_.Net_Core.ClassFiles;
 using System.Net;
 using System.IO;
+using System.Net.Http.Formatting;
+using System.Net.Http.Json;
 
 namespace WebServicesClient_.Net_Core.ClassFiles
 {
-    public class WebServiceClass
+    public partial class WebServiceClass
     {
-
         //Create Class Properties
         //public string baseURL { get; set; }
         //public string urlParameters { get; set; }
         //public string headerType { get; set; }
 
-        //Change to class vars, abel to view the variable content
+        //Change to class vars, able to view the variable content
         public string baseURL;
         public string urlParameters;
         public string headerType;
 
         /// <summary>
-        /// Change hard coding parameters to use Class Properties
+        /// 
         /// </summary>
-        public void TestWebService1()
+        public void TestGetAsync()
         {
             try
             {
+                //Update requst headers with global class vars
                 var client = WebServiceClientClass.HttpInstance;
-                //client.BaseAddress = new Uri("https://postman-echo.com/get");
+                var endpoint = baseURL + urlParameters;
+
                 client.DefaultRequestHeaders.Accept.Clear();
-                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
 
-                //GET Method
-                //var stringTask = client.GetStringAsync("https://postman-echo.com/get");
-                //var msg =  await stringTask;
-                //Console.Write(msg);
+                //Blocking call! Program will wait here until a response is received or a timeout occurs.
+                HttpResponseMessage response = client.GetAsync(endpoint).Result;
 
-                //HttpResponseMessage response = await client.GetAsync("https://postman-echo.com/get");
-                //var task = Task.Run(() => client.GetAsync("https://postman-echo.com/get"));
-                var task = Task.Run(() => client.GetAsync(baseURL + urlParameters));
-                task.Wait();
-                var response = task.Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    // Parse the response body.
+                    //var data = response.Content.ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                    var data = response.Content.ReadAsStringAsync().Result;
 
-                response.EnsureSuccessStatusCode();
-                //string responseBody = await response.Content.ReadAsStringAsync();
-                var responseBody = response.Content.ReadAsStringAsync().Result;
-                // Above three lines can be replaced with new helper method below
-                // string responseBody = await client.GetStringAsync(uri);
+                }
+                else
+                {
+                    //Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                    throw new Exception(response.ReasonPhrase);
+                }
 
-                Console.WriteLine(responseBody);
 
             }
             catch (Exception e)
@@ -64,97 +62,118 @@ namespace WebServicesClient_.Net_Core.ClassFiles
                 throw new Exception(e.ToString());
             }
 
+
         }
 
         /// <summary>
-        /// Change hard coding parameters to use Class Properties
+        /// The Number Conversion Web Service, implemented with Visual DataFlex, provides functions that convert 
+        /// numbers into words or dollar amounts.
+        /// 
+        /// Number to Dollars
+        /// Returns the word corresponding to the positive number passed as parameter. Limited to quadrillions.
         /// </summary>
-        /// This is from a previous HTTP project
-        public void TestWebService2()
+        /// <param name="number"></param>
+        public void TestPostAsync(int number)
         {
-            //This returns data in XML format identified by content type = XML
-            //http://maps.googleapis.com/maps/api/geocode/xml?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&sensor=false
-
-            //var url = "http://maps.googleapis.com/maps/api/geocode/xml?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&sensor=false";
-
-            //var url = "https://postman-echo.com/get";
-            var url = baseURL + urlParameters;
-
-            //Pass request to Postman api with orgin and destination details
-            System.Net.HttpWebRequest request = (System.Net.HttpWebRequest)WebRequest.Create(url);
-
-            //Consume web service synchronous
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            using (var streamReader = new StreamReader(response.GetResponseStream()))
+            try
             {
-                //XML format
-                var result = streamReader.ReadToEnd();
+                // Converting byte[] into System.Net.Http.HttpContent
+                //create byte array
+                byte[] data = new byte[1];
+                data[0] = 123;                  //Initialize with passed in value
+                //Now use the byteContent in the HTTP.PostAsync
+                ByteArrayContent byteContent = new ByteArrayContent(data);
 
-                if (!string.IsNullOrEmpty(result))
+
+                //Update requst headers with global class vars
+                var client = WebServiceClientClass.HttpInstance;
+                //var endpoint = baseURL + urlParameters;
+                //Call the Number to Dollars web service
+                var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
+                //var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso?op=NumberToDollars";
+
+                client.DefaultRequestHeaders.Accept.Clear();
+                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+
+                //Blocking call! Program will wait here until a response is received or a timeout occurs.
+                //HttpContent number = 123;
+                //HttpResponseMessage response = client.PostAsync(endpoint, 123, new JsonMediaTypeFormatter()).Result;
+                
+                JsonContent content = JsonContent.Create(123);
+                HttpResponseMessage response = client.PostAsync(endpoint, content).Result;
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var text = result.ToString();
+                    // Parse the response body.
+                    //var data = response.Content.ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                    var responseData = response.Content.ReadAsStringAsync().Result;
+
                 }
-            }
-        }
-
-        /// <summary>
-        /// Change hard coding parameters to use Class Properties
-        /// </summary>
-        public void TestWebService3()
-        {
-            var client = WebServiceClientClass.HttpInstance;
-            //client.BaseAddress = new Uri("https://postman-echo.com/get");
-            //var endpoint = "https://postman-echo.com/get";
-            var endpoint = baseURL + urlParameters;
-
-            client.DefaultRequestHeaders.Accept.Clear();
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
-
-            var response = client.GetAsync(endpoint).GetAwaiter().GetResult();
-            var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-        }
-
-        /// <summary>
-        /// Change hard coding parameters to use Class Properties
-        /// </summary>
-        public void TestWebService4()
-        {
-            //var URL = "https://postman-echo.com";
-            //var urlParameters = "/get";
-
-            var URL = baseURL;
-            var parameters = urlParameters;
-
-            var client = WebServiceClientClass.HttpInstance;
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.BaseAddress = new Uri(URL);
-
-            // Add an Accept header for JSON format.
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
-
-            // List data response.
-            HttpResponseMessage response = client.GetAsync(parameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
-            if (response.IsSuccessStatusCode)
-            {
-                // Parse the response body.
-                //var dataObjects = response.Content.ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
-                var dataObjects = response.Content.ReadAsStringAsync().Result;
-
-
-                foreach (var d in dataObjects)
+                else
                 {
-                    Console.WriteLine("{0}", d.ToString());
+                    //Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                    throw new Exception(response.ReasonPhrase);
                 }
+
+
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                throw new Exception(e.ToString());
             }
+
+
+        }
+
+        /// <summary>
+        /// The Number Conversion Web Service, implemented with Visual DataFlex, provides functions that convert 
+        /// numbers into words or dollar amounts.
+        /// 
+        /// Number to Words
+        /// Returns the non-zero dollar amount of the passed number.
+        /// </summary>
+        /// <param name="number"></param>
+        public void TestPostAsync2(int number)
+        {
+            try
+            {
+
+                //Update requst headers with global class vars
+                var client = WebServiceClientClass.HttpInstance;
+                //var endpoint = baseURL + urlParameters;
+                //Call the Number to Dollars web service
+                var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
+
+                client.DefaultRequestHeaders.Accept.Clear();
+                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
+                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+
+                //Blocking call! Program will wait here until a response is received or a timeout occurs.
+                //HttpContent number = 123;
+                HttpResponseMessage response = client.PostAsync(endpoint, 123, new JsonMediaTypeFormatter()).Result;
+                //HttpResponseMessage response = client.PostAsync(endpoint, byteContent).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Parse the response body.
+                    //var data = response.Content.ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                    var responseData = response.Content.ReadAsStringAsync().Result;
+
+                }
+                else
+                {
+                    //Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                    throw new Exception(response.ReasonPhrase);
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+
 
         }
 
@@ -162,5 +181,6 @@ namespace WebServicesClient_.Net_Core.ClassFiles
 
 
 
-    }//End  public class WebServiceClass
-}//End namespace WebServicesClient_.Net_Core.ClassFiles
+
+    }
+}

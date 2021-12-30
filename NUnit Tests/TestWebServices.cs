@@ -9,25 +9,36 @@ namespace WebServicesClient_.Net_Core.NUnit_Tests
         [Test]
         public void Test1()
         {
+
+            //TestWebServiceClass webService = new TestWebServiceClass();
+            //webService.TestWebServiceDriver();
+
+            //*****************************************************************************************
+            // This is from Soap UI Web Site - https://www.soapui.org/docs/rest-testing/
+            //Use this REST url to return 590 XML pet records
+            //https://petstore.swagger.io/v2/pet/findByStatus?status=available
+            //*****************************************************************************************
+
+             WebServiceClass webService = new WebServiceClass();
+
             //Set the class properties before calling the methods
-            WebServiceClass webService = new WebServiceClass();
-            webService.baseURL = "https://postman-echo.com";
-            webService.urlParameters = "/get";
+            webService.baseURL = "https://petstore.swagger.io/v2/pet";
+            webService.urlParameters = "/findByStatus?status=available";
+            //webService.headerType = "application/xml";       //set return Json response
             webService.headerType = "application/json";     //set return Json response
 
-            //Call the method to call the web service
-            webService.TestWebService1();
-
-            webService.headerType = "text/plain";     //set return text response
-            //Call the method to call the web service
-            webService.TestWebService1();
+            webService.TestGetAsync();
+ 
 
         }
 
         [Test]
         public void Test2()
         {
+            WebServiceClass webService = new WebServiceClass();
 
+            //Set the class properties before calling the methods
+            webService.TestPostAsync(123);
         }
 
         [Test]
