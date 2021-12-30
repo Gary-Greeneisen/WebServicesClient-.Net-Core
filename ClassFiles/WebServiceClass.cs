@@ -73,7 +73,7 @@ namespace WebServicesClient_.Net_Core.ClassFiles
         /// Returns the word corresponding to the positive number passed as parameter. Limited to quadrillions.
         /// </summary>
         /// <param name="number"></param>
-        public void TestPostAsync(int number)
+        public void TestPostAsync1(int number)
         {
             try
             {
@@ -89,8 +89,8 @@ namespace WebServicesClient_.Net_Core.ClassFiles
                 var client = WebServiceClientClass.HttpInstance;
                 //var endpoint = baseURL + urlParameters;
                 //Call the Number to Dollars web service
-                var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
-                //var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso?op=NumberToDollars";
+                //var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
+                var endpoint = "http://www.dataaccess.com/webservicesserver/";
 
                 client.DefaultRequestHeaders.Accept.Clear();
                 //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
@@ -99,8 +99,14 @@ namespace WebServicesClient_.Net_Core.ClassFiles
                 //Blocking call! Program will wait here until a response is received or a timeout occurs.
                 //HttpContent number = 123;
                 //HttpResponseMessage response = client.PostAsync(endpoint, 123, new JsonMediaTypeFormatter()).Result;
-                
-                JsonContent content = JsonContent.Create(123);
+
+                //JsonContent content = JsonContent.Create(123);
+                var myObject = new
+                {
+                    ubiNum = 123,
+                };
+
+                JsonContent content = JsonContent.Create(myObject);
                 HttpResponseMessage response = client.PostAsync(endpoint, content).Result;
                 
                 if (response.IsSuccessStatusCode)

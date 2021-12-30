@@ -38,7 +38,7 @@ namespace WebServicesClient_.Net_Core.NUnit_Tests
             WebServiceClass webService = new WebServiceClass();
 
             //Set the class properties before calling the methods
-            webService.TestPostAsync(123);
+            webService.TestPostAsync1(123);
         }
 
         [Test]
