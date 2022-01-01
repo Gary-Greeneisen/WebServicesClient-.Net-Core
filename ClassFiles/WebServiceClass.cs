@@ -10,6 +10,7 @@ using System.Net;
 using System.IO;
 using System.Net.Http.Formatting;
 using System.Net.Http.Json;
+using Newtonsoft.Json;
 
 namespace WebServicesClient_.Net_Core.ClassFiles
 {
@@ -89,24 +90,29 @@ namespace WebServicesClient_.Net_Core.ClassFiles
                 var client = WebServiceClientClass.HttpInstance;
                 //var endpoint = baseURL + urlParameters;
                 //Call the Number to Dollars web service
-                //var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
-                var endpoint = "http://www.dataaccess.com/webservicesserver/";
+                var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso";
+                //var endpoint = "https://www.dataaccess.com/webservicesserver/numberconversion.wso?op=NumberToDollars";
 
                 client.DefaultRequestHeaders.Accept.Clear();
                 //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/soap+xml"));
 
                 //Blocking call! Program will wait here until a response is received or a timeout occurs.
                 //HttpContent number = 123;
                 //HttpResponseMessage response = client.PostAsync(endpoint, 123, new JsonMediaTypeFormatter()).Result;
 
                 //JsonContent content = JsonContent.Create(123);
-                var myObject = new
-                {
-                    ubiNum = 123,
-                };
 
-                JsonContent content = JsonContent.Create(myObject);
+                //Use a Dictionary/List to add values pairs to the server call
+                var values = new Dictionary<string, string>();
+                values.Add("dNum", "123");
+
+                //********************************************************************************
+                //All these server calls return either 415/500 error ???
+                //var content = new StringContent(values.ToString(), System.Text.Encoding.UTF8, "application/xml");
+                var content = new StringContent(JsonConvert.SerializeObject(values), Encoding.UTF8, "application/soap+xml");
+                //var content = new FormUrlEncodedContent(values);
+
                 HttpResponseMessage response = client.PostAsync(endpoint, content).Result;
                 
                 if (response.IsSuccessStatusCode)
@@ -153,10 +159,13 @@ namespace WebServicesClient_.Net_Core.ClassFiles
 
                 client.DefaultRequestHeaders.Accept.Clear();
                 //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(headerType));
-                //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 
                 //Blocking call! Program will wait here until a response is received or a timeout occurs.
                 //HttpContent number = 123;
+
+                //********************************************************************************
+                //These server calls return either 415/500 error ???
                 HttpResponseMessage response = client.PostAsync(endpoint, 123, new JsonMediaTypeFormatter()).Result;
                 //HttpResponseMessage response = client.PostAsync(endpoint, byteContent).Result;
 
